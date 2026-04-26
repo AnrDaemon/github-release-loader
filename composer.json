@@ -1,0 +1,11 @@
+{
+    "require": {
+        "anrdaemon/net-url": "^0.3.0",
+        "anrdaemon/net-browser": "^0.2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "AnrDaemon\\Net\\GhLoader\\": "src/"
+        }
+    }
+}

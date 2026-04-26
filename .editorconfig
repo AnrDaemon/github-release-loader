@@ -1,0 +1,56 @@
+; This file is for unifying the coding style for different editors and IDEs.
+; More information at http://editorconfig.org
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Minified JavaScript files shouldn't be changed
+[**.min.js]
+indent_style = ignore
+insert_final_newline = ignore
+
+# Makefiles always use tabs for indentation
+[Makefile]
+indent_style = tab
+
+# Batch files use CRLF EOL
+[*.{bat,cmd,ps1,btm}]
+end_of_line = crlf
+
+[*.{dtd,xsd}]
+indent_size = 2
+
+# The JSON files contain newlines inconsistently
+[*.json]
+insert_final_newline = ignore
+
+[{composer,package,jsconfig,tsconfig}.json]
+indent_style = space
+
+[*.md]
+#trim_trailing_whitespace = false
+indent_size = 4
+
+# Use 4 spaces for the Python files
+[*.py]
+indent_size = 4
+max_line_length = 80
+
+[*.{svg,xml,xsl}]
+indent_size = 2
+
+# YAML uses 2 spaces indent
+[*.{y{,a}ml}]
+indent_style = space
+indent_size = 2
+
+# ZenScript uses 2-space indent, ZSproject as well
+[*.{zs,zsi,zsp}]
+indent_size = 2

@@ -1,0 +1,118 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "608392951e522fb2d1f3071f08f5fbad",
+    "packages": [
+        {
+            "name": "anrdaemon/net-browser",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://git.rootdir.org/php/net-browser.git",
+                "reference": "2286f6f3174115b6e2f62880c208a3ed2a3039c3"
+            },
+            "dist": {
+                "type": "tar",
+                "url": "https://satis.rootdir.org//dist/anrdaemon/net-browser/anrdaemon-net-browser-0.2.1-e7de85.tar",
+                "reference": "2286f6f3174115b6e2f62880c208a3ed2a3039c3",
+                "shasum": "07aac49e622b058ceb3d49ded63b53e80fd2c45e"
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^5.6 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-trunk": "0.x-dev",
+                    "dev-master": "0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AnrDaemon\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "AnrDaemon\\Tests\\": "test/"
+                }
+            },
+            "license": [
+                "WTFPL"
+            ],
+            "authors": [
+                {
+                    "name": "Andrey Repin",
+                    "email": "anrdaemon@yandex.ru"
+                }
+            ],
+            "description": "A very thin OOP cURL wrapper with runtime cookie persistence",
+            "time": "2025-07-22T10:00:41+00:00"
+        },
+        {
+            "name": "anrdaemon/net-url",
+            "version": "0.3",
+            "source": {
+                "type": "svn",
+                "url": "https://svn.rootdir.org/misc/php-tools/net-url",
+                "reference": "/tags/0.3/@1040"
+            },
+            "dist": {
+                "type": "tar",
+                "url": "https://satis.rootdir.org//dist/anrdaemon/net-url/anrdaemon-net-url-0.3-688ade.tar",
+                "reference": "/tags/0.3/@1040",
+                "shasum": "6412f1bd6398ef7037cdb6525795d70c8b0e2909"
+            },
+            "require": {
+                "php": "^5.3.6 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-trunk": "0.x-dev",
+                    "dev-master": "0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AnrDaemon\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "AnrDaemon\\Tests\\": "test/"
+                }
+            },
+            "license": [
+                "WTFPL"
+            ],
+            "authors": [
+                {
+                    "name": "Andrey Repin",
+                    "email": "anrdaemon@yandex.ru"
+                }
+            ],
+            "description": "A class to simplify handling of the various URL's (and some URI's)",
+            "time": "2019-11-20T02:23:52+03:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
+}
