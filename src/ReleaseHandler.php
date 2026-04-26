@@ -24,11 +24,11 @@ class ReleaseHandler {
     }
 
     /**
-     * URL is like "https://api.github.com/repos/GTNewHorizons/TinkersConstruct/releases/313690125"*
+     * URL is like "https://api.github.com/repos/GTNewHorizons/TinkersConstruct/releases/313690125"
      */
-    public function __invoke(string $url) {
+    public function __invoke(string $url): void {
         \set_error_handler(
-            function ($s, $m, $f, $l, $c = null) {
+            function ($s, $m, $f, $l, $c = \null) {
                 if ($s & (\E_WARNING)) {
                     throw new \ErrorException($m, 0, $s, $f, $l);
                 }
@@ -60,11 +60,17 @@ class ReleaseHandler {
 
         $cachePath = "{$this->cacheDirectory}/{$ta['owner']}/{$ta['repo']}-{$ta['id']}";
         if (!\is_dir($cachePath)) {
-            \mkdir($cachePath, 0777, true);
+            \mkdir($cachePath, 0777, \true);
         }
 
         $release = $this->loader->load($endpoint);
-        \file_put_contents("$cachePath/Release.nobrain", "{$release["html_url"]}\r\n\r\n{$release["body"]}");
+        if (!$this->filterRelease($release["tag_name"])) {
+            return;
+        }
+
+        $name = $release["name"] ?: $release["tag_name"];
+
+        \file_put_contents("$cachePath/Release.nobrain", "{$release["html_url"]}\r\n\r\n# {$name}\r\n\r\n{$release["body"]}");
         \touch("$cachePath/Release.nobrain", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $release["published_at"])->getTimestamp());
         \array_map(fn($asset) => $this->download($asset, $cachePath), \array_filter($release["assets"] ?? [], fn($asset) => $this->filterAssets($asset)));
     }
@@ -76,5 +82,9 @@ class ReleaseHandler {
 
     private function filterAssets(array $asset): bool {
         return $asset["content_type"] === "application/java-archive" && !\preg_match('{-(api|dev|sources|preshadow)\.jar$}iu', $asset['name']);
+    }
+
+    private function filterRelease(string $title): bool {
+        return !\preg_match('{-pre$}iu', $title);
     }
 }
