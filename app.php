@@ -33,16 +33,72 @@ try {
                 case 'GTNewHorizons':
                     break;
 
+                case 'TeamJM':
+                    switch ($event["repository"]["name"]) {
+                        case "journeymap-legacy":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
+                case 'MalTeeez':
+                    switch ($event["repository"]["name"]) {
+                        case "ChromatiFixes":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
+                case 'LegacyModdingMC':
+                    switch ($event["repository"]["name"]) {
+                        case "UniMixins":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
+                case 'Nolij':
+                    switch ($event["repository"]["name"]) {
+                        case "Zume":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
+                case 'DarkShadow44':
+                    switch ($event["repository"]["name"]) {
+                        case "DistantHorizonsStandalone":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
+                case 'unilock':
+                    switch ($event["repository"]["name"]) {
+                        case "DragonFixes":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
+                case 'FalsePattern':
+                    switch ($event["repository"]["name"]) {
+                        case "FalseTweaks":
+                        case "FalsePatternLib":
+                            break 2;
+
+                        default:
+                            continue 3;
+                    }
+
                 default:
                     continue 2;
-            }
-
-            switch ($event["repository"]["name"]) {
-                case "-":
-                    continue 2;
-
-                default:
-                    break;
             }
 
             switch ($event["subject"]["type"]) {
