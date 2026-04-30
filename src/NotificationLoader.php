@@ -16,6 +16,7 @@ class NotificationLoader {
     }
 
     /**
+     * @see https://docs.github.com/en/rest/activity/notifications?apiVersion=2026-03-10
      * @param \DateTimeInterface|null $before The date to load notfications up to.
      * @param \DateTimeInterface|null $since The date to load notifications starting from.
      * @param int $page Page number to load.
@@ -51,6 +52,7 @@ class NotificationLoader {
     }
 
     /**
+     * @see https://docs.github.com/en/rest/activity/notifications?apiVersion=2026-03-10#mark-a-thread-as-read
      * @param string $id The thread ID.
      * @return array
      */
