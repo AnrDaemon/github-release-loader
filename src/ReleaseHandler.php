@@ -58,7 +58,7 @@ class ReleaseHandler {
             throw new \LogicException("Invalid URL format");
         }
 
-        $cachePath = "{$this->cacheDirectory}/{$ta['owner']}/{$ta['repo']}-{$ta['id']}";
+        $cachePath = "{$this->cacheDirectory}/{$ta['owner']}/{$ta['repo']}";
         if (!\is_dir($cachePath)) {
             \mkdir($cachePath, 0777, \true);
         }
@@ -69,19 +69,24 @@ class ReleaseHandler {
         }
 
         $name = $release["name"] ?: $release["tag_name"];
+        $releaseFile = "$cachePath/Release-{$ta['id']}.nobrain";
 
-        \file_put_contents("$cachePath/Release.nobrain", "{$release["html_url"]}\r\n\r\n# {$name}\r\n\r\n{$release["body"]}");
-        \touch("$cachePath/Release.nobrain", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $release["published_at"])->getTimestamp());
-        \array_map(fn($asset) => $this->download($asset, $cachePath), \array_filter($release["assets"] ?? [], fn($asset) => $this->filterAssets($asset)));
+        \file_put_contents("$releaseFile", "{$release["html_url"]}\r\n\r\n# {$name}\r\n\r\n{$release["body"]}");
+        \touch("$releaseFile", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $release["published_at"])->getTimestamp());
+        \array_map(fn($asset) => $this->download($asset, $cachePath, $release["tag_name"]), \array_filter($release["assets"] ?? [], fn($asset) => $this->filterAssets($asset)));
     }
 
-    private function download(array $asset, string $cachePath): void {
-        \file_put_contents("$cachePath/{$asset['name']}", $this->downloader->load($asset['url']));
-        \touch("$cachePath/{$asset['name']}", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $asset["updated_at"])->getTimestamp());
+    private function download(array $asset, string $cachePath, string $tagName): void {
+        $assetName = new \SplFileInfo($asset['name']);
+        if (!\stristr($assetName->getBasename('.jar'), $tagName, true)) {
+            $assetName = $assetName->getBasename('.jar') . "-{$asset['id']}.jar";
+        }
+        \file_put_contents("$cachePath/$assetName", $this->downloader->load($asset['url']));
+        \touch("$cachePath/$assetName", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $asset["updated_at"])->getTimestamp());
     }
 
     private function filterAssets(array $asset): bool {
-        return $asset["content_type"] === "application/java-archive" && !\preg_match('{-(api|dev|sources|preshadow)\.jar$}iu', $asset['name']);
+        return $asset["content_type"] === "application/java-archive" && \preg_match('{\.jar$}iu', $asset['name']) && !\preg_match('{-(api|dev|sources|preshadow)\.jar$}iu', $asset['name']);
     }
 
     private function filterRelease(string $title): bool {
