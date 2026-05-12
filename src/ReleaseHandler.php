@@ -114,6 +114,7 @@ class ReleaseHandler {
 
         \file_put_contents("$cachePath/$assetName", $this->downloader->load($asset['url']));
         \touch("$cachePath/$assetName", $mdate);
+        \file_put_contents("$cachePath/Descript.ion", "$assetName {$asset['browser_download_url']}\r\n", \FILE_APPEND);
     }
 
     private function masksToFilter(array $filter): string {
