@@ -8,25 +8,42 @@ class ReleaseHandler {
     private ReleaseLoader $loader;
     private ReleaseAssetDownloader $downloader;
     private string $cacheDirectory;
+    private array $filesFilters;
 
+    /**
+     * @param array{
+     *  mark-read: bool,
+     *  include: array<string, array<int, string>>,
+     *  exclude: array<string, array<int, string>>,
+     *  cache-directory: string,
+     * } $options
+     */
     public function __construct(
         ReleaseLoader $loader,
         ReleaseAssetDownloader $downloader,
-        string $cacheDirectory
+        array $options
     ) {
+        if (!\is_dir($options["cache-directory"])) {
+            throw new \LogicException("Cache directory not found: {$options["cache-directory"]}");
+        }
+
         $this->loader = $loader;
         $this->downloader = $downloader;
-        $this->cacheDirectory = \realpath($cacheDirectory);
-
-        if (!\is_dir($cacheDirectory)) {
-            throw new \LogicException("Cache directory not found: $cacheDirectory");
-        }
+        $this->cacheDirectory = \realpath($options["cache-directory"]);
+        $this->filesFilters = $options['filter'];
     }
 
     /**
      * URL is like "https://api.github.com/repos/GTNewHorizons/TinkersConstruct/releases/313690125"
+     *
+     * @param string $url The endpoint URL address.
+     * @param array{
+     *  repo: string,
+     *  mask: array<int, string>,
+     *  filter: array<int, string>,
+     * } $options
      */
-    public function __invoke(string $url): void {
+    public function __invoke(string $url, array $options): void {
         \set_error_handler(
             function ($s, $m, $f, $l, $c = \null) {
                 if ($s & (\E_WARNING)) {
@@ -36,13 +53,16 @@ class ReleaseHandler {
         );
 
         try {
-            $this->handle((new Url($url))->path);
+            $include = $this->masksToFilter($options['mask']);
+            $exclude = $this->masksToFilter($options['filter']);
+
+            $this->handle((new Url($url))->path, $include, $exclude);
         } finally {
             \restore_error_handler();
         }
     }
 
-    private function handle(string $endpoint): void {
+    private function handle(string $endpoint, string $include, string $exclude): void {
         /**
          * @var array{
          *  owner: string,
@@ -64,7 +84,7 @@ class ReleaseHandler {
         }
 
         $release = $this->loader->load($endpoint);
-        if (!$this->filterRelease($release["tag_name"])) {
+        if ($release["prerelease"] || !$this->filterRelease($release["tag_name"])) {
             return;
         }
 
@@ -73,20 +93,37 @@ class ReleaseHandler {
 
         \file_put_contents("$releaseFile", "{$release["html_url"]}\r\n\r\n# {$name}\r\n\r\n{$release["body"]}");
         \touch("$releaseFile", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $release["published_at"])->getTimestamp());
-        \array_map(fn($asset) => $this->download($asset, $cachePath, $release["tag_name"]), \array_filter($release["assets"] ?? [], fn($asset) => $this->filterAssets($asset)));
+        \array_map(fn($asset) => $this->download($asset, $cachePath, $release["tag_name"]), \array_filter($release["assets"] ?? [], fn($asset) => $this->filterAssets($asset, $include, $exclude)));
     }
 
     private function download(array $asset, string $cachePath, string $tagName): void {
         $assetName = new \SplFileInfo($asset['name']);
-        if (!\stristr($assetName->getBasename('.jar'), $tagName, true)) {
-            $assetName = $assetName->getBasename('.jar') . "-{$asset['id']}.jar";
+        $version = \basename(\preg_replace("{[\\/<>?*:|\"\\000\t\r\n]}", '', $tagName));
+        if (!\stristr($assetName->getBasename('.' . $assetName->getExtension()), \ltrim($tagName, 'v.'), true)) {
+            $assetName = $assetName->getBasename('.' . $assetName->getExtension()) . "-{$version}.{$assetName->getExtension()}";
         }
+
+        $mdate = \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $asset["updated_at"])->getTimestamp() & ~1;
+        if (
+            \file_exists("$cachePath/$assetName")
+            && (\filemtime("$cachePath/$assetName") & ~1) === $mdate
+            && \filesize("$cachePath/$assetName") === $asset["size"]
+        ) {
+            return;
+        }
+
         \file_put_contents("$cachePath/$assetName", $this->downloader->load($asset['url']));
-        \touch("$cachePath/$assetName", \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $asset["updated_at"])->getTimestamp());
+        \touch("$cachePath/$assetName", $mdate);
     }
 
-    private function filterAssets(array $asset): bool {
-        return $asset["content_type"] === "application/java-archive" && \preg_match('{\.jar$}iu', $asset['name']) && !\preg_match('{-(api|dev|sources|preshadow)\.jar$}iu', $asset['name']);
+    private function masksToFilter(array $filter): string {
+        $list = \array_merge(...\array_map(fn($mask) => $this->filesFilters[$mask] ?? [$mask], $filter));
+
+        return '{^(' . \join('|', $list) . ')$}ui';
+    }
+
+    private function filterAssets(array $asset, string $include, string $exclude): bool {
+        return \preg_match($include, $asset['name']) && !\preg_match($exclude, $asset['name']);
     }
 
     private function filterRelease(string $title): bool {
